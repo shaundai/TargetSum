@@ -19,7 +19,9 @@ class Game extends React.Component {
     gameStatus = 'PLAYING';
     randomNumbers = Array.from({ length: this.props.randomNumberCount }).map(()=> 1 + Math.floor(40 * Math.random()))
     target = this.randomNumbers.slice(0, this.props.randomNumberCount - 2).reduce ((acc, curr) => acc + curr, 0);
-    shuffledRandomNumbers = shuffle(this.randomNumbers)
+    shuffledRandomNumbers = shuffle(this.randomNumbers);
+    timerStatus = 'going';
+
 
     componentDidMount(){
         this.intervalId = setInterval(()=> {
@@ -33,7 +35,7 @@ class Game extends React.Component {
         }, 1000)
     }
 
-    componentWillUpdate(nextProps, nextState){
+    UNSAFE_componentWillUpdate(nextProps, nextState){
         if(nextState.selectedIds !== this.state.selectedIds || nextState.remainingSeconds === 0){
             this.gameStatus = this.calcGameStatus(nextState);
             if(this.gameStatus !== 'PLAYING'){
@@ -62,6 +64,7 @@ class Game extends React.Component {
             return acc + this.shuffledRandomNumbers[curr]
         }, 0);
         if(nextState.remainingSeconds === 0){
+            this.timerStatus = 'up';
             return 'LOST'
         }
         if(sumSelected < this.target){
@@ -91,11 +94,10 @@ class Game extends React.Component {
                 />
                 )}
                 </View>
+                <Text style={[styles.timer, styles[`TIMERIS${this.timerStatus}`]]}>Seconds Remaining: {this.state.remainingSeconds}</Text>
                 {this.gameStatus !== 'PLAYING' && (
-                <Button title="Play Again" onPress={this.props.onPlayAgain}/>
+                <Button style={styles.playagain} title="Play Again" onPress={this.props.onPlayAgain}/>
                 )}
-                <Text>{this.gameStatus}</Text>
-                <Text>{this.state.remainingSeconds}</Text>
             </View>
         )
     }
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
         paddingTop: 30,
         textAlign: 'center',
         flex: .25,
+        flexWrap: 'wrap',
     },
     container: {
         backgroundColor: '#ddd',
@@ -116,8 +119,9 @@ const styles = StyleSheet.create({
         paddingLeft: 30,
     },
     target: {
+        color: 'purple',
         fontSize: 40,
-        backgroundColor: '#aaa',
+        backgroundColor: 'tan',
         marginHorizontal: 50,
         textAlign: 'center',
         margin: 50,
@@ -126,8 +130,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         flexWrap: 'wrap',
         flexDirection: 'row',
-        flex: 1,
-        margin: 40,
+        marginHorizontal: 40,
     },
     STATUS_PLAYING: {
         backgroundColor: '#bbb'
@@ -138,14 +141,25 @@ const styles = StyleSheet.create({
     STATUS_LOST: {
         backgroundColor: 'red'
     },
-
-    numbers: {
-        fontSize: 35,
-        backgroundColor: 'lavender',
+    timer: {
+        fontSize: 25,
         textAlign: 'center',
-        width: 100,
-        marginHorizontal: 15,
-        marginVertical: 25,
+        width: 300,
+        marginHorizontal: 5,
+        flex: 1,
+        alignSelf: 'center',
+    },
+
+    TIMERISgoing: {
+        color: 'purple',
+    },
+    TIMERISup: {
+        color: 'red',
+    },
+    playagain: {
+        marginTop: 0,
+        flex: 2,
+        marginBottom: 10,
     }
 })
 
